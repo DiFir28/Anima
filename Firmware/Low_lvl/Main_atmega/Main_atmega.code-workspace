@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "Main_atmega",
+			"path": "."
+		},
+		{
+			"name": "Robocup_Piranhus",
+			"path": "../../../../../../Documents/Robocup_Piranhus"
+		}
+	],
+	"settings": {}
+}
