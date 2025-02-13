@@ -8,12 +8,8 @@ int motor_id[] = {0x141, 0x142, 0x143, 0x144};
 void canInit(){
     SPI.begin();
     can.reset();
-    can.setBitrate(CAN_1000KBPS, MCP_8MHZ);
+    can.setBitrate(CAN_1000KBPS, MCP_16MHZ);
     can.setNormalMode();
-    for(short i=0; i<4;i++){
-        Serial.print(motor_id[i]);
-        Serial.print(" ");
-    }
 
 }
 
