@@ -1,65 +1,154 @@
 #include "setup/config.h"
+#include "setup/math.cpp"
 #include "movement/movement.h"
+#include "Sensors/Gyro/gyro.h"
+#include "Leds/leds.h"
+#include "Sensors/Line_circle/line.h"
 
-Motor motor1(0,10);
+//  line_circle circle;
 
-void setup() {
-  canInit();
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(115200);
-  attachInterrupt(0,stop, FALLING);
-  attachInterrupt(1,play, RISING);
-  
+Leds leds(8, 33);
 
-  
+int ret_i = 0;
+    short controlPin[3] = {22, 23, 24};
+    short slavPins[2] = {A0, A1};
+    struct lisens line_sensors[16];
+
+float ball_angle = 0.0;
+int getting = 0;
+float goals[] = {0.0, 0.0};
+bool have_ball = 0;
+
+void setConfigurate(int conf)
+{
+    for (int conf_i = 2; conf_i > -1; conf_i--)
+    {
+        digitalWrite(controlPin[conf_i], (conf >= pow(2, conf_i)));
+        conf = conf - pow(2, conf_i) * (conf >= pow(2, conf_i));
+    }
 }
-
-void loop() {
-  if(act){
-    for(int i=0;i<4;i++){
-      if (i ==break_m)continue;
-      motor[i].go(0.4);
+void get_from_cam()
+{  
+  Serial.println("GET");
+  leds.on(0, 20, 0, 0);
+  unsigned long start_read = millis();
+  while ((Serial.read() == -1) and (millis() - start_read < 200))
+  {
+  }
+  if (Serial.read() != -1)
+  {
+    leds.on(0, 0, 20, 0);
+    char get[17] = "";
+    int bytesRead = Serial.readBytesUntil('\n', get, 17 - 1);
+    ball_angle = atoi(get)/80;
+    leds.on(1, 0, atoi(get), 0);
+  }else{
+    leds.on(0, 0, 0, 20);
   }
 }
-delay(10);
+
+
+unsigned long last_time = 0;
+void setup()
+{
+  gyro_init();
+  Serial.begin(9600);
+  canInit();
+  pinMode(LED_BUILTIN, OUTPUT);
+  attachInterrupt(0, stop, FALLING);
+  attachInterrupt(1, play, RISING);
+  stop();
+  leds.on(0, 2, 2, 0);
+
+  //   while (!Serial.available()){
+  //     Serial.end();
+  //     delay(5);
+  // Serial.begin(115200);
+  // delay(5);
+  //   }
+  leds.on(0,20,0,20);
+  leds.on(1,0,0,0);
+
+  pinMode(22,OUTPUT);
+  pinMode(23,OUTPUT);
+  pinMode(24,OUTPUT);
+
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+
+
+  pinMode(4,INPUT);
+  while(digitalRead(4)==1){}
 }
 
 
 
-// struct can_frame frame;
+float move_ang = 0.0;
+float yaw_ang = 0.0;
+float move_speed = 4.0;
 
-// int encode = 0;
-// uint16_t encoderOffset = 12345;
+void loop()
+{
+//   for(int i =0; i<8; i++)
+// {setConfigurate(i);
+// Serial.print(analogRead(A0));
+// Serial.print("\t");
+// } 
 
-// uint32_t _speed = 600; 
-// int _time = 600;
+//   for(int i =0; i<8; i++)
+// {setConfigurate(i);
+// Serial.print(analogRead(A1));
+// Serial.print("\t");
+// } 
 
-// int sign(int a){
-//   return 2*(a>0)-2;
-//   }
-// void setup() {
-//   Serial.begin(115200);
+setConfigurate(0);
+Serial.print(analogRead(A0));
+Serial.print("\t");
+Serial.print(analogRead(A1));
+Serial.print("\t");
 
-//   canInit();
-// }
-// void loop() { 
-// if (k == 0){
-//   frame.can_id = motor_id[i]; k =1;}
+
+
+// get_from_cam();
+
+  //  Serial.print(millis());
+  //  Serial.print(" ");
+  //  Serial.print(millis()-last_time);
+  //  Serial.print(": ");
+  //  last_time = millis();
+
+  // gyro = gyro_read();
+  // char se[5];
+
+  // // Serial.print("Gyro: ");
+  // // Serial.print(gyro);
+
+  // itoa(int(gyro * 1000), se, DEC);
+  // // Serial.write(se);
+
   
-//     frame.can_dlc = 8;
-//     uint32_t speedcontrol = 10000 ;
+
+  // if (act)
+  // {
+  //   if (have_ball)
+  //   {
+  //   }
+  //   else
+  //   {
+  //     move_ang = ball_angle * 1.1 - sign(ball_angle) * 5;
+  //     yaw_ang = move_ang;
+  //   }
+  //   go(radvec(move_ang, move_speed), yaw_ang);
+  // }
+  // else
+  // {
+  //   // Serial.print(" Waiting for button press");
+  // }
+
+  // digitalWrite(LED_BUILTIN, LOW);
 
 
-//         // frame.data[0] = 0xA2;
-//         // frame.data[1] = 0x00;
-//         // frame.data[2] = 0x00;
-//         // frame.data[3] = 0x00;
-//         // frame.data[4] = *(uint8_t*)(&speedcontrol);
-//         // frame.data[5] = *((uint8_t*)(&speedcontrol) + 1);
-//         // frame.data[6] = *((uint8_t*)(&speedcontrol) + 2);
-//         // frame.data[7] = *((uint8_t*)(&speedcontrol) + 3);
+  delay(3);
 
-//    can.sendMessage(&frame);  //передаем CAN сообщение
-//   delayMicroseconds(100);
-//   Serial.println();
-// }
+  Serial.println(" ");
+}
