@@ -17,8 +17,9 @@ float a = 5 * M_PI / 2;
 void go(Vec v, float yaw)
 {
 
-    v.calcxy();
+   
     v = v.rot(-gyro_read());
+    v.calcxy();
     Serial.print(" ");
     // Serial.print(v.ang - gyro_read());
     Serial.print(" ");
@@ -27,8 +28,7 @@ void go(Vec v, float yaw)
         if (i == break_m)
             continue;
         motor[i].go(v, yaw,gyro_read());
-        Serial.print(cos(between(motor[i].ang, v.ang)) * v.len*100);
-        Serial.print(" ");
+     
     }
 
 

@@ -4,10 +4,16 @@
 #include "Sensors/Gyro/gyro.h"
 #include "Leds/leds.h"
 #include "Sensors/Line_circle/line.h"
+#include <Servo.h>
 
 //  line_circle circle;
 
 Leds leds(8, 33);
+
+char output[20]="";
+
+Servo motorA;
+
 
 int ret_i = 0;
     short controlPin[3] = {22, 23, 24};
@@ -29,21 +35,34 @@ void setConfigurate(int conf)
 }
 void get_from_cam()
 {  
+  strcat(output,"GET");
   Serial.println("GET");
   leds.on(0, 20, 0, 0);
   unsigned long start_read = millis();
-  while ((Serial.read() == -1) and (millis() - start_read < 200))
+  char a = Serial.read();
+  while ((a == -1) and (millis() - start_read < 50))
   {
+    leds.on(1, 0, 0, 0);
+    a = Serial.read();
   }
-  if (Serial.read() != -1)
-  {
+  if (a == -1)
+  {return;}
     leds.on(0, 0, 20, 0);
-    char get[17] = "";
-    int bytesRead = Serial.readBytesUntil('\n', get, 17 - 1);
-    ball_angle = atoi(get)/80;
-    leds.on(1, 0, atoi(get), 0);
-  }else{
-    leds.on(0, 0, 0, 20);
+    char get[12] = "";
+    char ball[8] = "";
+    int tasck = 0;
+    int bytesRead = Serial.readBytesUntil('\n', get, 12 - 1);
+     Serial.println(atoi(get));
+     
+
+    ball_angle = ball_angle + 0.8*(atoi(get)/80.0-ball_angle);
+    Serial.println(ball_angle);
+    leds.on(1, 20, 20, 0);
+  // }else{
+  //   leds.on(0, 0, 0, 20);
+  // }
+  for(short i = 0; i <20; i++){
+    output[i]='\0';
   }
 }
 
@@ -52,13 +71,32 @@ unsigned long last_time = 0;
 void setup()
 {
   gyro_init();
-  Serial.begin(9600);
+  Serial.begin(115200);
   canInit();
   pinMode(LED_BUILTIN, OUTPUT);
   attachInterrupt(0, stop, FALLING);
   attachInterrupt(1, play, RISING);
   stop();
   leds.on(0, 2, 2, 0);
+  motorA.attach(18);
+  motorA.writeMicroseconds(1900);
+  delay(2000);
+  motorA.writeMicroseconds(1000);
+  delay(2000);
+  motorA.writeMicroseconds(1400);
+  delay(2000);
+  motorA.writeMicroseconds(0);
+  delay(2000);
+
+  // motorA.attach(18);
+  // motorA.writeMicroseconds(1900);
+  // delay(2000);
+  // motorA.writeMicroseconds(1000);
+  // delay(2000);
+  // motorA.writeMicroseconds(1400);
+  // delay(2000);
+  // motorA.writeMicroseconds(0);
+  // delay(2000);
 
   //   while (!Serial.available()){
   //     Serial.end();
@@ -79,6 +117,8 @@ void setup()
 
   pinMode(4,INPUT);
   while(digitalRead(4)==1){}
+  leds.on(0, 0, 0, 0);
+
 }
 
 
@@ -89,57 +129,74 @@ float move_speed = 4.0;
 
 void loop()
 {
-//   for(int i =0; i<8; i++)
-// {setConfigurate(i);
-// Serial.print(analogRead(A0));
+  motorA.writeMicroseconds(1000);
 // Serial.print("\t");
-// } 
-
 //   for(int i =0; i<8; i++)
 // {setConfigurate(i);
+//   Serial.print(analogRead(A0));
+// Serial.print("\t");
 // Serial.print(analogRead(A1));
 // Serial.print("\t");
 // } 
+// setConfigurate(0);
+// setConfigurate(0);
+// Serial.print(analogRead(A0));
+// Serial.print("\t");
+// Serial.print(analogRead(A1));
+// Serial.print("\t");
 
-setConfigurate(0);
-Serial.print(analogRead(A0));
-Serial.print("\t");
-Serial.print(analogRead(A1));
-Serial.print("\t");
 
 
-
-// get_from_cam();
-
-  //  Serial.print(millis());
-  //  Serial.print(" ");
+char millis_char[7] = "";
+// itoa(millis(), millis_char, DEC);
+// strcat(output, millis_char);
+// strcat(output, ": ");
+// Serial.print(": ");
+//    Serial.print(millis());
+//    Serial.print(" ");
+//   Serial.print(": ");
   //  Serial.print(millis()-last_time);
   //  Serial.print(": ");
   //  last_time = millis();
 
-  // gyro = gyro_read();
+  gyro = gyro_read();
+  // Serial.print("Gyro: ");
+  // Serial.println(gyro);
   // char se[5];
+// strcat(output,"Gyro: ");
+// char* gr = 0;
+// if (gyro !=0.0){
+char gyro_char[6]="";
+//   dtostrf(gyro, int(log10(abs(int(gyro))))+3,2, gyro_char);
 
-  // // Serial.print("Gyro: ");
-  // // Serial.print(gyro);
+// strcat(output,gyro_char);
+// }else{
+//     strcat(output,"0.00");
+//   }
+// itoa(int(gyro),gyro_char, DEC);
+// strcat(output, gyro_char);
+//   strcat(output," ");
+ get_from_cam();
 
+  
   // itoa(int(gyro * 1000), se, DEC);
-  // // Serial.write(se);
+  // Serial.write(se);
 
   
 
-  // if (act)
-  // {
-  //   if (have_ball)
-  //   {
-  //   }
-  //   else
-  //   {
-  //     move_ang = ball_angle * 1.1 - sign(ball_angle) * 5;
-  //     yaw_ang = move_ang;
-  //   }
-  //   go(radvec(move_ang, move_speed), yaw_ang);
-  // }
+  if (act)
+  {
+    if (have_ball)
+    {
+    }
+    else
+    {
+      move_ang = ball_angle*1.1 +25;
+      yaw_ang = 0;
+    }
+    go(radvec(ball_angle, 2), ball_angle+gyro);
+    
+  }
   // else
   // {
   //   // Serial.print(" Waiting for button press");
@@ -148,7 +205,8 @@ Serial.print("\t");
   // digitalWrite(LED_BUILTIN, LOW);
 
 
-  delay(3);
+  // delay(3);
 
-  Serial.println(" ");
+  // Serial.println("");
+
 }

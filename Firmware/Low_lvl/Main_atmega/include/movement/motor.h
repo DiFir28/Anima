@@ -37,11 +37,11 @@ void Motor::go(Vec v, float yaw, float gyro){
     static float rerr = 0, lrerr = 0;
     // static float err = 0, lerr = 0;
     rerr = between(yaw, gyro);
-    rup = constrain(rkp * rerr + rkd * (lrerr - rerr),-2,2);
+    rup = constrain(rkp * rerr + rkd * (lrerr - rerr),-1.5,1.5);
     up = constrain(cos(between(ang, v.ang)) * v.len, -5, 5);
 
-
-    // Serial.print(up);
+    // Serial.print("\t");
+    // Serial.print(rup);
     // Serial.print("\t");
 
     dps = rup+up;
