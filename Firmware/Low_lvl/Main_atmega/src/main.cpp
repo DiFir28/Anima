@@ -37,38 +37,50 @@ bool have_ball = 0;
 //     }
 // }
 
-char get[15] = "";
+//char get[15] = "";
 
-void get_from_cam()
-{  
-  if (Serial.available()>0){
 
-    memset(get,0,strlen(get));
-    while(Serial.available()>0){int bytesRead = Serial.readBytesUntil('\n', get, 15 - 1);} 
-    char ang_get[6] = "";
-    char len_get[6] = "";
-    char* sep = strchr(get, ',');
-    strncpy(ang_get, get, sep - get);
+int get_arr[] = {0,0,0,0, 0};
+float get_rbp[] = {0,0,0,0};
+const char* gett;
 
-    if (strlen(get) >= 5){
-      ball_angle = ((atoi(get))/1000.0);
-      ball_len = (atoi(sep+1));
-    }
-
-    leds.on(1,0, (atoi(get))/600, 0);}
-
-  for(short i = 0; i <20; i++){
-    output[i]='\0';
+size_t countChar(const char* str, char target) {
+  size_t count = 0;
+  for (size_t i = 0; str[i] != '\0'; i++) {
+      if (str[i] == target) {
+          count++;
+      }
   }
-  
+  return count;
 }
+
+void convert(int count){
+  if (countChar(gett, ',') != count+1){
+    return;
+  }
+  char* sep =strchr(gett, ',');
+  for(int i = 0; i<count; i++){
+    char* l_sep = sep;
+    
+     sep = strchr(sep+1, ',');
+    char buf[7] = "";
+    strncpy(buf, l_sep+1, sep - l_sep-1);
+    get_arr[i] = atoi(buf );
+    
+    } 
+  }
+
+
 
 int drib_pow = 1450;
 
 unsigned long last_time = 0;
 void setup()
 {
-    motorA.attach(18);
+  canInit();
+  gyro_init();
+
+  motorA.attach(26);
   motorA.writeMicroseconds(1900);
   delay(2000);
   motorA.writeMicroseconds(1000);
@@ -77,17 +89,14 @@ void setup()
   delay(2000);
   motorA.writeMicroseconds(0);
   delay(2000);
-  // Serial.begin(115200);
-  canInit();
-  gyro_init();
+
+  
   pinMode(LED_BUILTIN, OUTPUT);
   attachInterrupt(0, stop, FALLING);
-  attachInterrupt(1, play, RISING);
+ // attachInterrupt(1, play, RISING);
   stop();
-  leds.on(0, 2, 2, 0);
 
-  leds.on(0,20,0,20);
-  leds.on(1,0,0,0);
+  leds.on(0, 2, 2, 0);
 
   pinMode(22,OUTPUT);
   pinMode(23,OUTPUT);
@@ -96,55 +105,19 @@ void setup()
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
 
-
   pinMode(4,INPUT);
-  // while(digitalRead(4)==1){}
-  leds.on(0, 0, 0, 0);
 
-
-     Serial.begin(115200);
-
-
-    // while(Serial.available()<=0){
-    //   Serial.println("66");
-    //   delay(100);
-    // }
-    
-    // char get[15] = " 1";
-    // long sended = millis();
-    
-    // delay(2000);
-    // Serial.println(sended);
-    // Serial.readBytesUntil('\n', get, 15 - 1);
-    // while(sended != atoi(get)){
-      
-    //   if (Serial.available() > 0){
-    //     memset(get,0,strlen(get));
-    //     int bytesRead = Serial.readBytesUntil('\n', get, 15 - 1);
-    //     if (sended != atoi(get)){
-
-    //       sended = millis();
-    //       Serial.print(sended);
-    //     }else{
-    //       break;
-    //     }   
-    //   }
-       
-      
-    //   delay(10);
-    // }
-
-    
-    
-    Serial.println(" Serial start ");
-    delay(100);
-    Serial.println(millis());
-    leds.on(0, 0, 100, 100);
-    delay(1000);
-
-    
+  RBP_Serial.begin(115200);
+  Serial.begin(115200);
+ 
+  leds.on(0, 0, 100, 100);
+  delay(1000);  
+  
 
 }
+
+bool play = 0;
+bool last_4 = 0;
 
 unsigned long drib_update = 0;
 
@@ -159,96 +132,72 @@ float aang = 0.0;
 
 void loop()
 {
-   motorA.writeMicroseconds(1150);
 
-    // Serial.print("  ");
+  motorA.writeMicroseconds(1480 - get_arr[3]);
+  Serial.print(play);
+
+  // RBP_Serial.print("  ");
   
-    //get_from_cam();
-
-    
+  //get_from_cam();
        
-    //go(radvec(ball_angle, 0.4 * (abs(between(gyro_read(), ball_angle)) < 0.3)), between(0, ball_angle));
+  //go(radvec(ball_angle, 0.4 * (abs(between(gyro_read(), ball_angle)) < 0.3)), between(0, ball_angle));
+  //go(radvec(2,1),1.0);
 
-     go(radvec(between(0, ball_angle),   0.4 * (abs(between(gyro_read(), ball_angle)) < 0.2) ),  between(0, ball_angle));
-
-  //   if (ball_len > 100){
-    
-  //   if (millis() - drib_update > 15){
-  //   drib_pow += (drib_pow < 1450);
-  //   drib_update = millis();
-  // }
-  //   leds.on(0,0,50,0);
+   //go(radvec(between(0, ball_angle),    1.2 * (abs(between(gyro_read(), ball_angle)) < 0.8) ),  between(0, ball_angle));
 
 
-  // if(digitalRead(4)==0 and drib_flag){
-  //   drib_flag = 0;
-    
-  //   for (int i  = 1400; i>1250; i--){
-  //     motorA.writeMicroseconds(i);
-  //     delay(10);
-  //     leds.on(0,0,100,250);
-  //   }
-
-
-  // }
-
-  
-  // }else{
-  //   go(radvec(ball_angle, 0.1 * (abs(between(gyro_read(), ball_angle)) < 0.5)), between(0, ball_angle));
-    
-    // if (millis() - drib_update > 15){
-    //   drib_pow -= (drib_pow > 1200);
-    //   drib_update = millis();
-    // }
-   
-
-  
-
-    //get_serial();
-    // leds.on(0, ser_get[0], ser_get[1],ser_get[2]);
-    // for(int i =0 ; i< 3; i++){
-    //     Serial.print(ser_get[i]);
-    //     Serial.print("  ");
-
-    // }
-
-
-
-
-    // aang -= 0.01;
-    // go(radvec(0,0), aang);
-    // Serial.print(aang);
-
-
-  
-    
-  // }
-  // else
-  // {
-  //   // Serial.print(" Waiting for button press");
-  // }
-
-  // digitalWrite(LED_BUILTIN, LOW);
-
-
-  // delay(3);
-
-   //Serial.print(" ");
-  // Serial2.println(123567);
-  // char a = Serial2.read();
- //  Serial.print(millis());
-  // Serial.print("Ang: ");
-  // Serial.print(curl_ball_ang);
-  //Serial.print(" Gyro: ");
-//   Serial.print(" ");
-   Serial.print( gyro_read() );
-  //Serial.print(" ");
-  // // Serial.print(get);
+  if (play){
+    go( radvec(get_arr[0]/1000.0,get_arr[1]/1000.0 ), get_arr[2]/1000.0, get_arr[4]/1000.0);
+  }else{
+    go(radvec(0,0),0);
+  }
+  Serial.print("accept^");
   Serial.print(" ");
-  Serial.print(drib_pow);
-  Serial.print(" ");  
-  Serial.print(ball_len);
-  Serial.println(" ");
-  delay(5);
+  Serial.print(get_arr[0]/1000.0);
+  Serial.print(" ");
+  Serial.print(get_arr[1]/1000.0);
+  Serial.print(" ");
+  Serial.print(get_arr[2]/1000.0);
+  Serial.print(" ");
+  Serial.print(1450 - get_arr[3]);
+  Serial.print(" ");
+
+  if (digitalRead(4) && !last_4){
+    play = !play;
+  }
+  last_4 = digitalRead(4);
+
+  RBP_Serial.print("   ");
+
+  Serial.print(gyro_read());
+  RBP_Serial.println( gyro_read() );
+
+
+  if (RBP_Serial.available() > 0) {
+    String received = RBP_Serial.readStringUntil('\n');
+    //received.trim();    
+    Serial.print(" ");
+    Serial.print(received);
+    gett =  received.c_str();
+
+    convert(5);
+    
+
+  }
+  Serial.println("");
+
+  for(int i =0; i<4;i++){
+    Serial.print(get_arr[i]);
+    Serial.print(" ");
+    }
+
+  RBP_Serial.print(" ");
+  // RBP_Serial.print(get);
+  RBP_Serial.print(" ");
+  RBP_Serial.print(drib_pow);
+  RBP_Serial.print(" ");  
+  RBP_Serial.print(ball_len);
+  RBP_Serial.println(" ");
+  delay(20);
 
 }

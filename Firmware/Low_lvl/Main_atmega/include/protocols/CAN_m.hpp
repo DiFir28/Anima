@@ -9,7 +9,7 @@ void canInit()
 {
     SPI.begin();
     can.reset();
-    can.setBitrate(CAN_1000KBPS, MCP_8MHZ);
+    can.setBitrate(CAN_1000KBPS, MCP_16MHZ);
     can.setNormalMode();
     for (short i = 0; i < 4; i++)
     {

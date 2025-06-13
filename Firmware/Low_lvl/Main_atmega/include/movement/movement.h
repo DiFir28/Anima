@@ -14,7 +14,7 @@ Motor motor[] = {
 
 float gyro;
 float a = 5 * M_PI / 2;
-void go(Vec v, float yaw)
+void go(Vec v, float yaw, float qq = 1)
 {
 
    
@@ -27,7 +27,7 @@ void go(Vec v, float yaw)
     {
         if (i == break_m)
             continue;
-        motor[i].go(v, yaw,gyro_read());
+        motor[i].go(v, yaw,gyro_read(), qq);
      
     }
 
@@ -53,7 +53,4 @@ void stop()
     flag = 0;
 }
 
-void play()
-{
-    flag = 1;
-}
+

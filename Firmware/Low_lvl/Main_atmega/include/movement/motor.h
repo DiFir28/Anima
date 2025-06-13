@@ -14,7 +14,7 @@ public:
     {
         msg.can_id = ID;
     }
-    void go(Vec v, float yaw, float gyro);
+    void go(Vec v, float yaw, float gyro, float qqq);
 
     void update();
     void setSpeed(float mps);
@@ -25,17 +25,17 @@ private:
     unsigned long last_time_change = 0;
     unsigned long last_tick = 0, tick = 0, dtick;
     float kp = 0, ki = 0, kd = 0, up = 0;
-    float rkp = 1, rki = 0.001, rkd = 5, rup = 0, rI = 0;
+    float rkp = 0.8, rki = 0.00001, rkd = 4, rup = 0, rI = 0;
 
     float mps, rps, curr_rpm, dps;
     long speed;
 };
 
-void Motor::go(Vec v, float yaw, float gyro){
+void Motor::go(Vec v, float yaw, float gyro, float qqq){
     static float rerr = 0, lrerr = 0;
     // static float err = 0, lerr = 0;
     rerr = between(yaw, gyro);
-    rup = constrain(rkp * rerr + rkd * (lrerr - rerr) + rki * rI,-0.6,0.6);
+    rup = constrain(rkp * rerr + rkd * (lrerr - rerr) + rki * rI,-qqq,qqq);
     up = constrain(cos(between(ang, v.ang)) * v.len, -5, 5);
 
     // Serial.print("\t");
@@ -70,9 +70,9 @@ void Motor::setSpeed(float dps)
     last_tick = tick;
     // Serial.print(" ");
     // Serial.print(ID);
-    // Serial.print(" ");
-    // Serial.print(mps);
-    // Serial.print(" ");
+    // Serial.print(": ");
+    // Serial.print(dps);
+    // Serial.print("   ");
 }
 
 void Motor::update()
