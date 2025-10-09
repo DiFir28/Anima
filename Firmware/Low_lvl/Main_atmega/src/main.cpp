@@ -448,11 +448,25 @@ void setup() {
 
 }
 long iter = 0;
+  static uint8_t buffer[16];
+  
 void loop() {
-  Serial.print("T");
- Serial.print(iter);
- Serial.print("E");
- Serial.println(int(1000*sin(millis()/1000.0)));
- delay(50);
- iter +=1;
+//   Serial.print("T");
+//  Serial.print(iter);
+//  Serial.print("E");
+//  Serial.println(int(1000*sin(millis()/1000.0)));
+//  delay(50);
+//  iter +=1;
+ size_t index = 0;
+  if (Serial.available() > 0){
+  while (Serial.available() > 0) {
+    buffer[index++] = Serial.read();}}
+
+  for (int i = 0; i<16; i +=1){
+    Serial.print(buffer[i]);
+  Serial.print(" ");
+   Serial.print(buffer[i]+ (buffer[i+1]<<8));
+   Serial.print(" ");
+}Serial.println("");
+    
 }
